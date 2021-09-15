@@ -34,6 +34,8 @@ void updateSwitches();
 // array will hold the player's position as X ([0]) and Y ([1])
 int player[2];
 int enemy[2];
+const int initialX = 80;
+const int initialY = 72;
 
 void main() {
 
@@ -60,21 +62,24 @@ void firstLevel(){
 	plot_intro_image(firstLevelBackground_tile_data,firstLevelBackground_map_data);
 
 	// Load the the 'sprites' tiles into sprite memory
-	set_sprite_data(0, 2, flight);
+	set_sprite_data(0, 0, flight);
 	
 	// Set the first movable sprite (0) to be the first tile in the sprite memory (0)
 	set_sprite_tile(0,0);
 
-	player[0] = 80;
-	player[1] = 72;
+	player[0] = initialX;
+	player[1] = initialY;
 
 
 	// enemy
-	//set_sprite_data(2, 4, enemyTile);
-	//set_sprite_tile(3,4);
+	set_sprite_data(1, 1, enemyTile);
+	set_sprite_tile(1,1);
+	set_sprite_tile(2,1);
+	set_sprite_tile(3,1);
+	set_sprite_tile(4,1);
 
 	enemy[0] = 100;
-	enemy[1] = 92;
+	enemy[1] = 92; 
 }
 
 void updateSwitches() {
@@ -107,7 +112,7 @@ void checkInput() {
 
 	// DOWN
 	if (joypad() & J_DOWN ) {
-		if(player[1]<150){
+		if(player[1]<130){
 			player[1]++;
 		}
 	}
@@ -129,7 +134,13 @@ void checkInput() {
 	// Move the sprite in the first movable sprite list (0)
 	//  the the position of X (player[0]) and y (player[1])
 	move_sprite(0, player[0], player[1]);
-	move_sprite(1, enemy[0], enemy[1]);
+	
+	//enemy
+	move_sprite(1, enemy[0]-10, enemy[1]-30);
+	move_sprite(2, enemy[0]-30, enemy[1]-10);
+	move_sprite(3, enemy[0]-40, enemy[1]-40);
+	move_sprite(4, enemy[0]-50, enemy[1]-20);
+
 
 	if(collisionCheck(player[0], player[1], 8, 8, enemy[0], enemy[1], 8, 8) == 1) {
 		

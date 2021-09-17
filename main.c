@@ -31,10 +31,11 @@ void updateSwitches();
 // The player
 // array will hold the player's position as X ([0]) and Y ([1])
 int player[2];
-int enemy[2];
+int enemy[2][10];
 int lives;
 const int initialX = 80;
 const int initialY = 120;
+int cntrl;
 
 
 void main() {
@@ -61,8 +62,8 @@ void firstLevel(){
 
 	player[0] = initialX;
 	player[1] = initialY;
-	enemy[0] = 100;
-	enemy[1] = 92; 
+	enemy[0][0] = 100;
+	enemy[0][1] = 92; 
 	// Load the the 'sprites' tiles into sprite memory
 	set_sprite_data(0, 0, flight);
 	set_sprite_data(1, 1, enemyTile);
@@ -95,6 +96,7 @@ void checkInput() {
     if (joypad() & J_START) {
 		lives=3;
 		firstLevel();
+		cntrl=0;
     }
 
 	// B
@@ -134,18 +136,32 @@ void checkInput() {
 	//  the the position of X (player[0]) and y (player[1])
 	move_sprite(0, player[0], player[1]);
 	
+	if(cntrl == 0){
+		enemy[0][0]--;
+		if(enemy[0][0]==70){
+			cntrl = 1;
+		}
+	}else {
+		if(cntrl == 1){
+			enemy[0][0]++;
+			if(enemy[0][0]==140){
+				cntrl = 0;
+			}
+		}
+	}
+
 	//enemy
-	move_sprite(1, enemy[0]-10, enemy[1]-30);
-	move_sprite(2, enemy[0]-30, enemy[1]-10);
-	move_sprite(3, enemy[0]-40, enemy[1]-40);
-	move_sprite(4, enemy[0]-50, enemy[1]-20);
+	move_sprite(1, enemy[0][0]-10, enemy[0][1]-30);
+	move_sprite(2, enemy[0][0]-30, enemy[0][1]-10);
+	move_sprite(3, enemy[0][0]-40, enemy[0][1]-40);
+	move_sprite(4, enemy[0][0]-50, enemy[0][1]-20);
 
 	//lives
 	if(lives>2){move_sprite(5, 130, 145);}
 	if(lives>1){move_sprite(6, 140, 145);}
 	if(lives>0){move_sprite(7, 150, 145);}
 
-	if(collisionCheck(player[0], player[1], 8, 8, enemy[0]-10, enemy[1]-30, 8, 8) == 1) {
+	if(collisionCheck(player[0], player[1], 8, 8, enemy[0][0]-10, enemy[0][1]-30, 8, 8) == 1) {
 
 		lives--;
 		//printf("live %d",lives);

@@ -9,7 +9,6 @@
 #include <gb/gb.h>
 #include <gb/console.h>
 #include <gb/drawing.h>
-#include <rand.h>
 #include <stdio.h>
 
 //imports
@@ -29,42 +28,46 @@ void init();
 void firstLevel();
 void checkInput();
 void updateSwitches();
-void initAlien();
-void avantAlien();
-int  isEnd();
 
+int enemy[2];
 const int initialX = 80;
 const int initialY = 120;
-int cntrl, firePositionX, firePositionY, lives;
+int cntrl, firePositionX, firePositionY, enemyPosX, enemyPosY, enemyMinusX, enemyMinusY, lives;
 
-struct alien {	int posicionx, posiciony, visible, class, sprite;};
-struct starShip {	int posicionx, posiciony, visible, class, fired;} player;
+struct alien {
+	int posicionx, posiciony, visible, class;
+};
 
-struct alien aliens[24];
+struct alien aliens[23];
 
+struct starShip {
+	int posicionx, posiciony, visible, class, fired;
+} player;
 
 void main() {
-
-	//alien inicialization
-	initAlien();
+	/*
+	for(int i=0;i<23;i++){
+		aliens[i].posiciony=0;
+		aliens[i].posicionx=0;
+		aliens[i].visible=1;
+	}*/
 	init();
+	//struct starship player;
 	while(1) {	
 		checkInput();				// Check for user input (and act on it)
 		updateSwitches();			// Make sure the SHOW_SPRITES and SHOW_BKG switches are on each loop
 		wait_vbl_done();			// Wait until VBLANK to avoid corrupting memory
-
-		
 	}
 }
 
 void init() {
-	lives=3;
 	DISPLAY_ON;						// Turn on the display
 	plot_intro_image(jujube_tile_data,jujube_map_data);
 	plot_background_image(startScreen_tile_data,startScreen_map_data);
 }
 
 void setSprites(){
+	int i;
 
 	// Load the the 'sprites' tiles into sprite memory
 	set_sprite_data(0, 0, flight);
@@ -77,16 +80,15 @@ void setSprites(){
 	set_sprite_tile(0,0);
 	
 	//lives
-	for(int i=1; i<4; i++){
+	for(i=1; i<4; i++){
 		set_sprite_tile(i,0);
 	}
-
-	//enemy
-	for(int i=10; i<34; i++){
+	
+	//enemies
+	for(i=10; i<40; i++){//40
 		set_sprite_tile(i,1);
 	}
-	//set_sprite_tile(10,1);
-	
+
 	//fire
 	set_sprite_tile(8,2);
 }
@@ -99,6 +101,8 @@ void firstLevel(){
 	player.class = 0;
 	player.fired = 0;
 
+	enemy[0] = 100;
+	enemy[1] = 70; 
 	setSprites();
 }
 
@@ -115,7 +119,6 @@ void checkInput() {
     if (joypad() & J_START) {
 		lives=3;
 		firstLevel();
-		initAlien();
 		cntrl=0;
     }
 
@@ -126,26 +129,8 @@ void checkInput() {
 			firePositionY = player.posiciony-8;
 			move_sprite(8, firePositionX, firePositionY);
 			player.fired=1;
-			
-			NR52_REG = 0x80;
-		NR51_REG = 0x11;
-		NR50_REG = 0x77;
-
-		NR10_REG = 0x1E;
-		NR11_REG = 0x10;
-		NR12_REG = 0xF3;
-		NR13_REG = 0x00;
-		NR14_REG = 0x87;
 		}
     }
-
-
-	// A
-   /* if (joypad() & J_A) {
-		if(aliens[0].visible==1){
-			aliens[0].visible=0;
-		}
-    }*/
 	
 	// LEFT
 	if (joypad() & J_LEFT){
@@ -162,8 +147,7 @@ void checkInput() {
 	// Move the sprite in the first movable sprite list (0)
 	//  the the position of X (player.posicionx) and y (player.posiciony)
 	move_sprite(0, player.posicionx, player.posiciony);
-	
-	//Gestion de disparo
+/*	
 	if(player.fired==1){
 		//fire velocity
 		for(int fireVelocity = 0;fireVelocity<4;fireVelocity++){
@@ -178,81 +162,82 @@ void checkInput() {
 			player.fired=0;
 		}
 	}
+*/
+
+	//enemy move
+	
+	enemyMinusY=0;
+	enemyMinusX=0;
+	int alienVectorPosition=0;
+	for(int i=10 ; i<33 ; i++){//34
+		enemyMinusY=enemyMinusY+10;
+		enemyPosX = enemy[0];
+		enemyPosY = enemy[1];
+		alienVectorPosition=i-10;
+
+		aliens[alienVectorPosition].posicionx = enemyPosX-enemyMinusX;
+		aliens[alienVectorPosition].posiciony = enemyPosY-enemyMinusY;
+
+		move_sprite(i, aliens[i-10].posicionx, enemyPosY-enemyMinusY);
+
+		if(enemyMinusY==40){
+			enemyMinusY=0;
+			enemyMinusX= enemyMinusX+15;
+		}
+	}
+	/*
+
+	if(cntrl == 0){
+		enemy[0]--;
+		if(enemy[0]==90){
+			cntrl = 1;
+		}
+	}else {
+		if(cntrl == 1){
+			enemy[0]++;
+			if(enemy[0]==150){
+				cntrl = 0;
+				enemy[1]++;
+				enemy[1]++;enemy[1]++;enemy[1]++;enemy[1]++;enemy[1]++;enemy[1]++;
+				enemy[1]++;enemy[1]++;enemy[1]++;enemy[1]++;enemy[1]++;enemy[1]++;
+			}
+		}
+	}
 
 	//lives
-	if(lives>2){move_sprite(1, 130, 145);
-	
-	}else{hide_sprite(1);}
-	if(lives>1){move_sprite(2, 140, 145);}else{hide_sprite(2);}
-	if(lives>0){move_sprite(3, 150, 145);}else{hide_sprite(3);}
 
-	if(lives == 0){printf("GAME OVER");}
-	//printf("%d",lives);
+	if(lives>2){move_sprite(1, 130, 145);}
+	if(lives>1){move_sprite(2, 140, 145);}
+	if(lives>0){move_sprite(3, 150, 145);}
 
-	//alien
-	for(int i=0;i<24;i++){
+	if(collisionCheck(player.posicionx, player.posiciony, 8, 8, enemy[0], enemy[1], 8, 8) == 1) {
+		lives--;
+		player.posicionx = initialX;
+		player.posiciony = initialY;
+
+		enemy[0] = 100;
+		enemy[1] = 70;
+
+		move_sprite(0, player.posicionx, player.posiciony);
+
+		if(lives<3){hide_sprite(1);}
+		if(lives<2){hide_sprite(2);}
+		if(lives<1){hide_sprite(3);}
 		
-		if(collisionCheck(aliens[i].posicionx, aliens[i].posiciony, 8, 8,firePositionX, firePositionY, 8, 8) == 1) {
-			aliens[i].visible=0;
+		if(lives==0){
+			printf("game over");
 		}
+		delay(2000);
+	} */
 
-		if(aliens[i].visible==1) {
-			move_sprite(aliens[i].sprite, aliens[i].posicionx, aliens[i].posiciony);
-		}else{
-			hide_sprite(aliens[i].sprite);
+/*
+	//it's end of the screen?
+	for(int i=0;i<24;i++){
+		if(aliens[i].posiciony<=10){
+			printf("has llegado a final de pantallaaaaa\n");
+			printf("%d\n",aliens[i].posiciony);
+			printf("%d\n",i);
+			delay(500);
 		}
-	}
-
-	avantAlien();
-
-	if(isEnd()==0){
-		printf("You Win");
-	}
-}
-
-void initAlien(){//y limit is 130
-	//The limit of aliens is between 10 to 155
-	int randomN=0;
-	int s=0;
-	for(int i=0;i<24;i++){
-		s=0;
-		while(s==0){
-			randomN=rand()%110+10;
-			if(randomN<155&&randomN>10){
-				s=1;
-			}
-		}
-		
-		aliens[i].posicionx = randomN;
-		aliens[i].posiciony = 0;
-		aliens[i].visible = 1;  
-		aliens[i].class = 0;
-		aliens[i].sprite = i+10;
-	}
-}
-
-int isEnd(){
-	//The limit of aliens is between 10 to 155
-	int gameOver=0;
-	for(int i=0;i<24;i++){
-		if(aliens[i].visible == 1){
-			gameOver=1;
-		} 		
-	}
-	return gameOver;
-}
-
-void avantAlien(){//y limit is 130
-	//The limit of aliens is between 10 to 155
-	for(int i=0;i<24;i++){
-		if(aliens[i].visible == 1){
-			aliens[i].posiciony ++;
-			if(aliens[i].posiciony==150){
-				aliens[i].visible=0;
-				lives--;
-				//printf("%d",lives);
-			}
-			break;
-		} 		
-	}
+	}*/
 }

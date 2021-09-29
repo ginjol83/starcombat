@@ -13,17 +13,19 @@
 #include <stdio.h>
 
 //imports
-#include "../projects/StarCombat/Characters/flight.c"
-#include "../projects/StarCombat/Characters/enemy.c"
-#include "../projects/StarCombat/Characters/fire.c"
+#include "../StarCombat/Characters/flight.c"
+#include "../StarCombat/Characters/enemy.c"
+#include "../StarCombat/Characters/fire.c"
 
-#include "../projects/StarCombat/Libreries/collisions.h"
-#include "../projects/StarCombat/Libreries/backgrounds.h"
+#include "../StarCombat/Libreries/collisions.h"
+#include "../StarCombat/Libreries/backgrounds.h"
 
 //backgrounds
-#include "../projects/StarCombat/BackGrounds/startScreen.c"
-#include "../projects/StarCombat/BackGrounds/firstLevelBackground.c"
-#include "../projects/StarCombat/BackGrounds/jujube.c"
+#include "../StarCombat/BackGrounds/startScreen.c"
+#include "../StarCombat/BackGrounds/firstLevelBackground.c"
+#include "../StarCombat/BackGrounds/youWinBackground.c"
+#include "../StarCombat/BackGrounds/gameOverBackground.c"
+#include "../StarCombat/BackGrounds/jujube.c"
 
 void init();
 void firstLevel();
@@ -35,7 +37,8 @@ int  isEnd();
 
 const int initialX = 80;
 const int initialY = 120;
-int cntrl, firePositionX, firePositionY, lives;
+int cntrl, firePositionX, firePositionY, lives, bposx, bposy, moveBkg;
+
 
 struct alien {	int posicionx, posiciony, visible, class, sprite;};
 struct starShip {	int posicionx, posiciony, visible, class, fired;} player;
@@ -44,6 +47,7 @@ struct alien aliens[24];
 
 
 void main() {
+	bposx = bposy = moveBkg = 0;
 
 	//alien inicialization
 	initAlien();
@@ -117,6 +121,7 @@ void checkInput() {
 		firstLevel();
 		initAlien();
 		cntrl=0;
+		moveBkg=1;
     }
 
 	// B
@@ -128,25 +133,17 @@ void checkInput() {
 			player.fired=1;
 			
 			NR52_REG = 0x80;
-		NR51_REG = 0x11;
-		NR50_REG = 0x77;
+			NR51_REG = 0x11;
+			NR50_REG = 0x77;
 
-		NR10_REG = 0x1E;
-		NR11_REG = 0x10;
-		NR12_REG = 0xF3;
-		NR13_REG = 0x00;
-		NR14_REG = 0x87;
+			NR10_REG = 0x1E;
+			NR11_REG = 0x10;
+			NR12_REG = 0xF3;
+			NR13_REG = 0x00;
+			NR14_REG = 0x87;
 		}
     }
 
-
-	// A
-   /* if (joypad() & J_A) {
-		if(aliens[0].visible==1){
-			aliens[0].visible=0;
-		}
-    }*/
-	
 	// LEFT
 	if (joypad() & J_LEFT){
 		if (player.posicionx>9){
@@ -163,7 +160,7 @@ void checkInput() {
 	//  the the position of X (player.posicionx) and y (player.posiciony)
 	move_sprite(0, player.posicionx, player.posiciony);
 	
-	//Gestion de disparo
+	//Fire gestion 
 	if(player.fired==1){
 		//fire velocity
 		for(int fireVelocity = 0;fireVelocity<4;fireVelocity++){
@@ -180,14 +177,27 @@ void checkInput() {
 	}
 
 	//lives
-	if(lives>2){move_sprite(1, 130, 145);
-	
-	}else{hide_sprite(1);}
-	if(lives>1){move_sprite(2, 140, 145);}else{hide_sprite(2);}
-	if(lives>0){move_sprite(3, 150, 145);}else{hide_sprite(3);}
+	if(lives>2){
+		move_sprite(1, 130, 145);
+	}else{
+		hide_sprite(1);		
+	}
+	if(lives>1){
+		move_sprite(2, 140, 145);
+	}else{
+		hide_sprite(2);
+	}
+	if(lives>0){
+		move_sprite(3, 150, 145);
+	}else{
+		hide_sprite(3);
+	}
 
-	if(lives == 0){printf("GAME OVER");}
-	//printf("%d",lives);
+	if(lives == 0){
+		plot_background_image(gameOverBackground_tile_data,gameOverBackground_map_data);
+		moveBkg = 0;
+		move_bkg( 0, 0);
+	}
 
 	//alien
 	for(int i=0;i<24;i++){
@@ -206,8 +216,13 @@ void checkInput() {
 	avantAlien();
 
 	if(isEnd()==0){
-		printf("You Win");
+		plot_background_image(youWinBackground_tile_data,youWinBackground_map_data);
+		moveBkg = 0;
+		move_bkg( 0, 0);
 	}
+
+	//move background
+	if(moveBkg==1){move_bkg( bposx, bposy++);}
 }
 
 void initAlien(){//y limit is 130
@@ -221,8 +236,7 @@ void initAlien(){//y limit is 130
 			if(randomN<155&&randomN>10){
 				s=1;
 			}
-		}
-		
+		}		
 		aliens[i].posicionx = randomN;
 		aliens[i].posiciony = 0;
 		aliens[i].visible = 1;  
@@ -250,7 +264,6 @@ void avantAlien(){//y limit is 130
 			if(aliens[i].posiciony==150){
 				aliens[i].visible=0;
 				lives--;
-				//printf("%d",lives);
 			}
 			break;
 		} 		

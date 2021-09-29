@@ -1,0 +1,93 @@
+NOTAS DE PROGRAMACIÓN PARA GAME BOY
+
+------------------------------------------------------------------------
+Características técnicas de la GameBoy:
+
+CPU: 8-bit Sharp LR35902 (Similar al Z80) a 4.19 MHz
+8K de RAM principal
+8K de Video RAM
+2.6” LCD 160×144, 4 Tonos
+Sonido estéreo, 4 Canales
+Puerto serie (ext)
+6V, 0.7A
+90 mm x 148 x 32 mm
+------------------------------------------------------------------------ 
+
+
+
+GBDK (GameBoy Development Kit) el cual se puede descargar desde la siguiente URL: http://sourceforge.net/projects/gbdk/ 
+
+instalarlo en algún directorio de vuestra unidad C: 
+
+se recomienda usar Visual studio code como editor de código, en su defecto Notepad++.
+
+Bibliografia recomendada para aprender C (ANSI C): C programing language de Dennis M.Ritchie
+
+
+Esqueleto basico de un juego:
+
+----------------------------------------------------------------------------------
+//includes and imports
+#include <gb/gb.h>
+
+//Variables area 
+
+//functions declarations area
+void checkInput();
+void updateSwitches();
+
+//Main function
+void main() {
+	while(1) {	
+		checkInput();				// Check for user input (and act on it)
+		updateSwitches();			// Make sure the SHOW_SPRITES and SHOW_BKG switches are on each loop
+		wait_vbl_done();			// Wait until VBLANK to avoid corrupting memory
+	}
+}
+
+void updateSwitches() {
+	HIDE_WIN;
+	SHOW_SPRITES;
+	SHOW_BKG;
+}
+
+//Butons functions
+void checkInput() {
+	// START
+    if (joypad() & J_START) {
+    }
+
+}
+----------------------------------------------------------------------------------
+
+waitpad(J_START);
+
+Esta función está incluida en gb.h y en este caso lo que hace es "bloquear" la ejecución del programa hasta que el 
+usuario pulse el botón START de la consola. 
+
+----------------------------------------------------------------------------------
+
+En el gb.h están mapeados todos los botones de la GameBoy mediante códigos y los nombres de las constantes son los 
+siguientes:
+
+SELECCIONARCOPIAR
+J_START
+J_SELECT
+J_B
+J_A
+J_DOWN
+J_UP
+J_LEFT
+J_RIGHT
+
+----------------------------------------------------------------------------------
+
+
+Para compilar la sentencia: (recomendable que sea en un .bat para automatizar el proceso) 
+
+lcc -o programa.gb programa.c
+
+
+
+
+

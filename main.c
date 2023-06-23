@@ -5,14 +5,14 @@
  * Cophright: Jujube@2021
  */
 
-//includes
+/* -----------------------------------------includes--------------------------------------------------*/
 #include <gb/gb.h>
 #include <gb/console.h>
 #include <gb/drawing.h>
 #include <rand.h>
 #include <stdio.h>
 
-//imports
+/* -----------------------------------------imports--------------------------------------------------*/
 #include "../StarCombat/Characters/flight.c"
 #include "../StarCombat/Characters/enemy.c"
 #include "../StarCombat/Characters/fire.c"
@@ -20,12 +20,14 @@
 #include "../StarCombat/Libreries/collisions.h"
 #include "../StarCombat/Libreries/backgrounds.h"
 
-//backgrounds
+/* -----------------------------------------backgrounds--------------------------------------------------*/
 #include "../StarCombat/BackGrounds/startScreen.c"
 #include "../StarCombat/BackGrounds/firstLevelBackground.c"
 #include "../StarCombat/BackGrounds/youWinBackground.c"
 #include "../StarCombat/BackGrounds/gameOverBackground.c"
 #include "../StarCombat/BackGrounds/jujube.c"
+
+/* -----------------------------------------const--------------------------------------------------*/
 
 void init();
 void firstLevel();
